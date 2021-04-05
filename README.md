@@ -8,4 +8,4 @@ video2frames is a utility to convert video files into single image frames. Depen
 
 ## Example use case:
 
-`video2frames -i pipe.mp4 -o ./exported_frames`
+`video2frames -i source.mp4 -o ./exported_frames`

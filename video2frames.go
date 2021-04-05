@@ -24,7 +24,7 @@ var grayScale bool
 
 func main() {
 	flag.StringVar(&destinationDirectory, "o", ".", "Specify output directory.")
-	flag.StringVar(&inputFile, "f", "", "Specify input video file.")
+	flag.StringVar(&inputFile, "i", "", "Specify input video file.")
 	flag.StringVar(&outputSize, "s", "", "Specify output image width. (e.g. 600x800)")
 	flag.StringVar(&logOutputDest, "l", "", "Log file output destination.")
 	flag.StringVar(&outputSuffix, "suffix", "", "Add suffix to the output file.")

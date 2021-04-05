@@ -70,7 +70,7 @@ func checkInputFile(sourceFile string) {
 			panic(appendToLog(sourceFileError))
 		}
 	} else {
-		panic(appendToLog("Source file not provided (e.g. -f test_data.mp4)"))
+		panic(appendToLog("Source file not provided (Use: -i source.mp4)"))
 	}
 }
 

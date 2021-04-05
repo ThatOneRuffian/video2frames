@@ -1,4 +1,3 @@
-# video_to_frames
 video2frames is a utility to convert video files into single image frames. Depends on ffmpeg CLI utilities.
 
 ## Main Features

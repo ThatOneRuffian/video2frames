@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/barasher/go-exiftool"
 )
 
 // ============= User Input Variables ===============
@@ -36,6 +38,17 @@ func main() {
 
 	checkParameters()
 	startConversion()
+	writeExifData()
+}
+
+func writeExifData() {
+	exifTool, err := exiftool.NewExiftool()
+	// snap shot before and after files and loop through the new files
+	// write meta data from json file template
+	if err != nil {
+		appendToLog("Unable to create exiftool. Skiping writing of metadata.")
+	}
+	fmt.Println(exifTool)
 }
 
 func checkParameters() {

@@ -37,18 +37,28 @@ func main() {
 	flag.Parse()
 
 	checkParameters()
-	startConversion()
-	writeExifData()
+	//startConversion()
+	dumpExifData("./test_data/test_exif.jpg")
 }
 
-func writeExifData() {
-	exifTool, err := exiftool.NewExiftool()
-	// snap shot before and after files and loop through the new files
-	// write meta data from json file template
+func dumpExifData(filePath string) {
+	exifToolObj, err := exiftool.NewExiftool()
 	if err != nil {
-		appendToLog("Unable to create exiftool. Skiping writing of metadata.")
+		exitToolErr := fmt.Sprint("Unable to create exiftool. Skiping writing of metadata.", err)
+		panic(appendToLog(exitToolErr))
 	}
-	fmt.Println(exifTool)
+	defer exifToolObj.Close()
+	fileInfos := exifToolObj.ExtractMetadata(filePath)
+	for _, fileInfo := range fileInfos {
+		if fileInfo.Err != nil {
+			fileErr := fmt.Sprint("Error reading meta data: ", fileInfo.File, fileInfo.Err)
+			fmt.Printf(appendToLog(fileErr))
+			continue
+		}
+		for k, v := range fileInfo.Fields {
+			fmt.Printf("[%v] %v\n", k, v)
+		}
+	}
 }
 
 func checkParameters() {

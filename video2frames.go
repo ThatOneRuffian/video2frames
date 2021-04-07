@@ -39,8 +39,12 @@ func main() {
 	flag.Parse()
 
 	checkParameters()
-	//startConversion()
-	dumpExifData("./test_data/test_exif.jpg")
+	if len(fileToExifDump) == 0 {
+		startConversion()
+	} else {
+		dumpExifData(fileToExifDump)
+	}
+
 }
 
 func dumpExifData(filePath string) {
@@ -54,12 +58,13 @@ func dumpExifData(filePath string) {
 	for _, fileInfo := range fileInfos {
 		if fileInfo.Err != nil {
 			fileErr := fmt.Sprint("Error reading meta data: ", fileInfo.File, fileInfo.Err)
-			fmt.Printf(appendToLog(fileErr))
-			continue
+			panic(appendToLog(fileErr))
+
 		}
 		for k, v := range fileInfo.Fields {
 			fmt.Printf("[%v] %v\n", k, v)
 		}
+		break
 	}
 }
 

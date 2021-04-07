@@ -6,6 +6,10 @@ video2frames is a utility to convert video files into single image frames. Depen
 - Set output dimensions
 - Set output factor (e.g. skip every other frame: `video2frames -x 50...`)
 
+## Dependancies
+- exiftool
+- ffmpeg
+
 ## Example use case:
 
 `video2frames -i source.mp4 -o ./exported_frames`

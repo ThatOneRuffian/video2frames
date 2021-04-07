@@ -112,7 +112,7 @@ func checkInputFile(sourceFile string) {
 func startConversion() {
 	fileFormat := ".bmp" //uncompressed bitmap default
 	if compressOutput {
-		fileFormat = ".png"
+		fileFormat = ".jpg"
 	}
 
 	conversionFactorFloat := float64(conversionFactor)

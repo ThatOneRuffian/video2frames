@@ -20,6 +20,7 @@ var logOutputDest string
 var outputSize string
 var outputSuffix string
 var outputPrefix string
+var fileToExifDump string
 var conversionFactor int
 var compressOutput bool
 var grayScale bool
@@ -29,6 +30,7 @@ func main() {
 	flag.StringVar(&inputFile, "i", "", "Specify input video file.")
 	flag.StringVar(&outputSize, "s", "", "Specify output image width. (e.g. 600x800)")
 	flag.StringVar(&logOutputDest, "l", "", "Log file output destination.")
+	flag.StringVar(&fileToExifDump, "d", "", "Dump the exif data of the provided file.")
 	flag.StringVar(&outputSuffix, "suffix", "", "Add suffix to the output file.")
 	flag.StringVar(&outputPrefix, "prefix", "", "Add prefix to the output file.")
 	flag.IntVar(&conversionFactor, "x", 100, "Out of every 100 frames convert X frames.")
@@ -44,7 +46,7 @@ func main() {
 func dumpExifData(filePath string) {
 	exifToolObj, err := exiftool.NewExiftool()
 	if err != nil {
-		exitToolErr := fmt.Sprint("Unable to create exiftool. Skiping writing of metadata.", err)
+		exitToolErr := fmt.Sprint("Unable to create exiftool object. Aborting metadata dump.", err)
 		panic(appendToLog(exitToolErr))
 	}
 	defer exifToolObj.Close()
@@ -66,7 +68,12 @@ func checkParameters() {
 	if len(logOutputDest) > 0 {
 		dirHandler(&logOutputDest)
 	}
-	checkInputFile(inputFile)
+	if len(fileToExifDump) == 0 {
+		checkInputFile(inputFile)
+	} else {
+		dumpExifData(fileToExifDump)
+	}
+
 	if conversionFactor > 100 || conversionFactor < 1 {
 		panic(appendToLog("Conversion factor must be within range 1-100%."))
 	}

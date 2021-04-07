@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -21,9 +22,17 @@ var outputSize string
 var outputSuffix string
 var outputPrefix string
 var fileToExifDump string
+var exifDataSource string
 var conversionFactor int
+var exifGenerateTemplate bool
 var compressOutput bool
 var grayScale bool
+
+type ExifData struct {
+	Make        string
+	Model       string
+	Focallength string
+}
 
 func main() {
 	flag.StringVar(&destinationDirectory, "o", ".", "Specify output directory.")
@@ -31,20 +40,48 @@ func main() {
 	flag.StringVar(&outputSize, "s", "", "Specify output image width. (e.g. 600x800)")
 	flag.StringVar(&logOutputDest, "l", "", "Log file output destination.")
 	flag.StringVar(&fileToExifDump, "d", "", "Dump the exif data of the provided file.")
+	flag.StringVar(&exifDataSource, "exif-data", "", "Provide a JSON file for writing key exif data.")
 	flag.StringVar(&outputSuffix, "suffix", "", "Add suffix to the output file.")
 	flag.StringVar(&outputPrefix, "prefix", "", "Add prefix to the output file.")
 	flag.IntVar(&conversionFactor, "x", 100, "Out of every 100 frames convert X frames.")
 	flag.BoolVar(&grayScale, "g", false, "Convert output to grayscale.")
 	flag.BoolVar(&compressOutput, "c", false, "Compress output into PNG format. Default uncompressed BMP.")
+	flag.BoolVar(&exifGenerateTemplate, "export-exif-template", false, "Generate JSON template file. For use with supported exif data writing (exif-data).")
 	flag.Parse()
 
 	checkParameters()
-	if len(fileToExifDump) == 0 {
+
+	if len(fileToExifDump) == 0 && !exifGenerateTemplate {
 		startConversion()
-	} else {
+	}
+
+	if len(fileToExifDump) > 0 {
 		dumpExifData(fileToExifDump)
 	}
 
+	if len(exifDataSource) > 0 {
+		//write exif data
+	}
+
+	if exifGenerateTemplate {
+		//generate exif data
+		exportJSONtemplate()
+	}
+
+}
+
+func exportJSONtemplate() {
+	//export supported exif data tags
+	exifDataTemplate := ExifData{"desired_camera_make", "desired_camera_model", "desired_focallength"}
+	dataToWrite, encodeErr := json.Marshal(exifDataTemplate)
+	if encodeErr != nil {
+		fmt.Println(appendToLog("Unable to encode template data"))
+	}
+	writeData(destinationDirectory+"exif_data.JSON", string(dataToWrite), true)
+}
+
+func loadJSONexif(filePath string) {
+	//open
 }
 
 func dumpExifData(filePath string) {
@@ -73,9 +110,9 @@ func checkParameters() {
 	if len(logOutputDest) > 0 {
 		dirHandler(&logOutputDest)
 	}
-	if len(fileToExifDump) == 0 {
+	if len(fileToExifDump) == 0 && !exifGenerateTemplate {
 		checkInputFile(inputFile)
-	} else {
+	} else if len(fileToExifDump) > 0 {
 		dumpExifData(fileToExifDump)
 	}
 
@@ -181,23 +218,32 @@ func dirHandler(targetDir *string) {
 //append string to log
 func appendToLog(logEntry string) string {
 	if len(logOutputDest) > 0 {
-		rawData := time.Now().String() + ": " + logEntry + string('\n')
+		dataToWrite := time.Now().String() + ": " + logEntry + string('\n')
 
-		dataToWrite := []byte(rawData)
-
-		logFile, err := os.OpenFile(logOutputDest+"log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		//check file open errors
-		if err != nil {
-			log.Fatal(err)
-		}
-		//attempt write to log
-		if _, err := logFile.Write(dataToWrite); err != nil {
-			log.Fatal(err)
-		}
-		//attempt to close log
-		if err := logFile.Close(); err != nil {
-			log.Fatal(err)
-		}
+		writeData(logOutputDest+"log.txt", dataToWrite, false)
 	}
 	return logEntry
+}
+
+func writeData(filePath string, rawData string, overWrite bool) {
+
+	if overWrite {
+		err := os.Remove(filePath)
+		if err != nil {
+			appendToLog("Unable to remove file.")
+		}
+	}
+	logFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//check file open errors
+	if err != nil {
+		log.Fatal(err)
+	}
+	//attempt file write
+	if _, err := logFile.Write([]byte(rawData)); err != nil {
+		log.Fatal(err)
+	}
+	//attempt file close
+	if err := logFile.Close(); err != nil {
+		log.Fatal(err)
+	}
 }

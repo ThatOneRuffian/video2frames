@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -64,7 +65,7 @@ func main() {
 	}
 
 	if exifGenerateTemplate {
-		//generate exif data
+		//generate exif data template
 		exportJSONtemplate()
 	}
 
@@ -80,8 +81,26 @@ func exportJSONtemplate() {
 	writeData(destinationDirectory+"exif_data.JSON", string(dataToWrite), true)
 }
 
-func loadJSONexif(filePath string) {
-	//open
+func loadJSONexif() ExifData {
+	jsonFile, err := os.Open(destinationDirectory + "exif_data.JSON")
+	var jsonData ExifData
+	if err != nil {
+		appendToLog("Could not open JSON file.")
+		return jsonData
+	}
+
+	fileScan := bufio.NewScanner(jsonFile)
+
+	for fileScan.Scan() {
+		inputRow := fileScan.Text()
+		decodeErr := json.Unmarshal([]byte(inputRow), &jsonData)
+
+		if decodeErr != nil {
+			appendToLog("Error decoding JSON file.")
+		}
+
+	}
+	return jsonData
 }
 
 func dumpExifData(filePath string) {

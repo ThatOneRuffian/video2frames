@@ -1,11 +1,11 @@
-video2frames is a utility to convert video files into single image frames. Depends on ffmpeg CLI utilities.
+video2frames is a utility to convert video files into single image frames. Also supports writing of common exif tags.
 
 ## Main Features
 - Uncompressed BMP or Compressed JPEG output
 - Grayscale output
 - Set output dimensions
 - Set output factor (e.g. skip every other frame: `video2frames -x 50...`)
-- write custom exifdata for use with popular SFM and photogrammetry software
+- Write custom exifdata for use with popular SFM and photogrammetry software
 
 ## Dependancies
 - exiftool

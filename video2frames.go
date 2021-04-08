@@ -17,13 +17,14 @@ import (
 
 // ============= User Input Variables ===============
 var inputFile string
-var destinationDirectory string
-var logOutputDest string
 var outputSize string
 var outputSuffix string
 var outputPrefix string
+var logOutputDest string
 var fileToExifDump string
 var exifDataSource string
+var programWorkingDir string
+var destinationDirectory string
 var conversionFactor int
 var exifGenerateTemplate bool
 var compressOutput bool
@@ -62,6 +63,7 @@ func main() {
 
 	if len(exifDataSource) > 0 {
 		//write exif data
+		writeExifData()
 	}
 
 	if exifGenerateTemplate {
@@ -69,6 +71,9 @@ func main() {
 		exportJSONtemplate()
 	}
 
+	if len(exifDataSource) > 0 {
+		writeExifData()
+	}
 }
 
 func exportJSONtemplate() {
@@ -82,7 +87,7 @@ func exportJSONtemplate() {
 }
 
 func loadJSONexif() ExifData {
-	jsonFile, err := os.Open(destinationDirectory + "exif_data.JSON")
+	jsonFile, err := os.Open(exifDataSource)
 	var jsonData ExifData
 	if err != nil {
 		appendToLog("Could not open JSON file.")
@@ -101,6 +106,42 @@ func loadJSONexif() ExifData {
 
 	}
 	return jsonData
+}
+
+func writeExifData() {
+	stdOutLoc := os.Stdout
+	customTags := loadJSONexif()
+	//Check PATH for exiftool
+	exifToolPath, err := exec.LookPath("exiftool")
+	if err != nil {
+		// if not found in path then search current dir for exiftool
+
+		localDmsgget := fmt.Sprintf(programWorkingDir + "/exiftool")
+
+		exifToolPath, err = exec.LookPath(localDmsgget)
+		if err != nil {
+			exifError := fmt.Sprintf("Unable to find exiftool in PATH or current dir: %s", localDmsgget)
+			fmt.Println(appendToLog(exifError))
+			os.Exit(1)
+		}
+	}
+
+	exifToolTags := []string{exifToolPath, "-overwrite_original"}
+	exifToolTags = append(exifToolTags, "-make="+string(customTags.Make))
+	exifToolTags = append(exifToolTags, "-model="+customTags.Model)
+	exifToolTags = append(exifToolTags, "-FocalLength="+customTags.Focallength)
+	exifToolTags = append(exifToolTags, destinationDirectory)
+
+	exifToolCmd := &exec.Cmd{
+		Path:   exifToolPath,
+		Args:   exifToolTags,
+		Stdout: stdOutLoc,
+		Stderr: os.Stderr,
+	}
+	fmt.Println("Writing exif data...")
+	if err := exifToolCmd.Run(); err != nil {
+
+	}
 }
 
 func dumpExifData(filePath string) {
@@ -144,6 +185,13 @@ func checkParameters() {
 		} else {
 			panic(appendToLog("Size argument must be provided in the following format: WxH"))
 		}
+	}
+	_programWorkingDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(appendToLog("Error obtaining program's working dir."))
+		programWorkingDir = "./"
+	} else {
+		programWorkingDir = _programWorkingDir
 	}
 }
 

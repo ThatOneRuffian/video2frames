@@ -53,24 +53,17 @@ func main() {
 	checkParameters()
 
 	if len(fileToExifDump) == 0 && !exifGenerateTemplate {
+		// start video conversion to frames
 		startConversion()
-	}
-
-	if len(fileToExifDump) > 0 {
+	} else if len(fileToExifDump) > 0 {
+		// dump target exif data
 		dumpExifData(fileToExifDump)
-	}
-
-	if len(exifDataSource) > 0 {
-		//write exif data
-		writeExifData()
-	}
-
-	if exifGenerateTemplate {
+	} else if exifGenerateTemplate {
 		//generate exif data template
 		exportJSONtemplate()
 	}
-
 	if len(exifDataSource) > 0 {
+		//write exif data
 		writeExifData()
 	}
 }

@@ -6,13 +6,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/barasher/go-exiftool"
 )
 
 // ============= User Input Variables ===============
@@ -145,24 +144,26 @@ func writeExifData() {
 }
 
 func dumpExifData(filePath string) {
-	exifToolObj, err := exiftool.NewExiftool()
-	if err != nil {
-		exitToolErr := fmt.Sprint("Unable to create exiftool object. Aborting metadata dump.", err)
-		panic(appendToLog(exitToolErr))
+	exifToolCmd := exec.Command("exiftool", filePath)
+	exifToolCmd.Stderr = os.Stderr
+	fmt.Println("Dumping meta data now: ", filePath)
+	stdOut, err := exifToolCmd.StdoutPipe()
+	if nil != err {
+		fmt.Println(appendToLog("Error attaching to exiftool stdout:"), err.Error())
 	}
-	defer exifToolObj.Close()
-	fileInfos := exifToolObj.ExtractMetadata(filePath)
-	for _, fileInfo := range fileInfos {
-		if fileInfo.Err != nil {
-			fileErr := fmt.Sprint("Error reading meta data: ", fileInfo.File, fileInfo.Err)
-			panic(appendToLog(fileErr))
+	stdOutReader := bufio.NewReader(stdOut)
+	go func(stdOutReader io.Reader) {
+		scanner := bufio.NewScanner(stdOutReader)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+	}(stdOutReader)
 
-		}
-		for k, v := range fileInfo.Fields {
-			fmt.Printf("[%v] %v\n", k, v)
-		}
-		break
+	if err := exifToolCmd.Start(); nil != err {
+		fmt.Println(fmt.Sprintf("Error starting program: %s, %s", exifToolCmd.Path, err.Error()))
+		fmt.Println("Make sure that exiftool is installed on your system")
 	}
+	exifToolCmd.Wait()
 }
 
 func checkParameters() {
@@ -172,8 +173,6 @@ func checkParameters() {
 	}
 	if len(fileToExifDump) == 0 && !exifGenerateTemplate {
 		checkInputFile(inputFile)
-	} else if len(fileToExifDump) > 0 {
-		dumpExifData(fileToExifDump)
 	}
 
 	if conversionFactor > 100 || conversionFactor < 1 {

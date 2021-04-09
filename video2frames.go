@@ -52,7 +52,7 @@ func main() {
 
 	checkParameters()
 
-	if len(fileToExifDump) == 0 && !exifGenerateTemplate {
+	if len(fileToExifDump) == 0 && !exifGenerateTemplate && len(inputFile) > 0 {
 		// start video conversion to frames
 		startConversion()
 	} else if len(fileToExifDump) > 0 {
@@ -200,7 +200,7 @@ func checkInputFile(sourceFile string) {
 			// catch all other file errors and log
 			panic(appendToLog(sourceFileError))
 		}
-	} else {
+	} else if !(len(exifDataSource) > 0) {
 		panic(appendToLog("Source file not provided (Use: -i source.mp4)"))
 	}
 }

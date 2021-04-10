@@ -16,3 +16,9 @@ video2frames is a utility to convert video files into single image frames. Also 
 ## Example use case:
 
 `video2frames -i source.mp4 -o ./exported_frames`
+
+## Typical workflow:
+
+`video2frames --export-exif-template`  // Fill out the generated JSON file with desired exif data
+
+`video2frames -x 30 -c --exif-data ./exif_data.JSON -i source.mp4 -o ./exported_frames`

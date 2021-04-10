@@ -5,7 +5,7 @@ video2frames is a utility to convert video files into single image frames. Also 
 - Grayscale output
 - Set output dimensions
 - Set output factor (e.g. skip every other frame: `video2frames -x 50...`)
-- Write custom exif data for use with popular SFM and photogrammetry software
+- Write custom exif data for use with popular SFM and photogrammetry software (JPEG only)
 - Dump exif data for images
 
 ## Dependancies

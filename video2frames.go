@@ -120,12 +120,23 @@ func writeExifData() {
 	}
 
 	exifToolTags := []string{exifToolPath, "-overwrite_original"}
-	exifToolTags = append(exifToolTags, "-make="+string(customTags.Make))
-	exifToolTags = append(exifToolTags, "-model="+customTags.Model)
-	exifToolTags = append(exifToolTags, "-FocalLength="+customTags.Focallength)
-	exifToolTags = append(exifToolTags, "-focallengthin35mmformat="+customTags.Focallengthin35mmformat)
-	exifToolTags = append(exifToolTags, destinationDirectory)
+	if len(customTags.Make) > 0 {
+		exifToolTags = append(exifToolTags, "-make="+customTags.Make)
+	}
 
+	if len(customTags.Model) > 0 {
+		exifToolTags = append(exifToolTags, "-model="+customTags.Model)
+	}
+
+	if len(customTags.Focallength) > 0 {
+		exifToolTags = append(exifToolTags, "-FocalLength="+customTags.Focallength)
+	}
+
+	if len(customTags.Focallengthin35mmformat) > 0 {
+		exifToolTags = append(exifToolTags, "-focallengthin35mmformat="+customTags.Focallengthin35mmformat)
+	}
+
+	exifToolTags = append(exifToolTags, destinationDirectory)
 	exifToolCmd := &exec.Cmd{
 		Path:   exifToolPath,
 		Args:   exifToolTags,

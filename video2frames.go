@@ -30,9 +30,10 @@ var compressOutput bool
 var grayScale bool
 
 type ExifData struct {
-	Make        string
-	Model       string
-	Focallength string
+	Make                    string
+	Model                   string
+	Focallength             string
+	Focallengthin35mmformat string
 }
 
 func main() {
@@ -70,7 +71,7 @@ func main() {
 
 func exportJSONtemplate() {
 	//export supported exif data tags
-	exifDataTemplate := ExifData{"desired_camera_make", "desired_camera_model", "desired_focallength"}
+	exifDataTemplate := ExifData{"desired_camera_make", "desired_camera_model", "desired_focallength", "desired_focallengthin35mmformat"}
 	dataToWrite, encodeErr := json.Marshal(exifDataTemplate)
 	if encodeErr != nil {
 		fmt.Println(appendToLog("Unable to encode template data"))
@@ -122,6 +123,7 @@ func writeExifData() {
 	exifToolTags = append(exifToolTags, "-make="+string(customTags.Make))
 	exifToolTags = append(exifToolTags, "-model="+customTags.Model)
 	exifToolTags = append(exifToolTags, "-FocalLength="+customTags.Focallength)
+	exifToolTags = append(exifToolTags, "-focallengthin35mmformat="+customTags.Focallengthin35mmformat)
 	exifToolTags = append(exifToolTags, destinationDirectory)
 
 	exifToolCmd := &exec.Cmd{

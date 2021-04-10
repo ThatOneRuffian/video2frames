@@ -25,6 +25,7 @@ var exifDataSource string
 var programWorkingDir string
 var destinationDirectory string
 var conversionFactor int
+var qualityFactor int
 var exifGenerateTemplate bool
 var compressOutput bool
 var grayScale bool
@@ -46,6 +47,7 @@ func main() {
 	flag.StringVar(&outputSuffix, "suffix", "", "Add suffix to the output file.")
 	flag.StringVar(&outputPrefix, "prefix", "", "Add prefix to the output file.")
 	flag.IntVar(&conversionFactor, "x", 100, "Out of every 100 frames convert X frames.")
+	flag.IntVar(&qualityFactor, "q", 1, "Set the quality of the export 1-31.")
 	flag.BoolVar(&grayScale, "g", false, "Convert output to grayscale.")
 	flag.BoolVar(&compressOutput, "c", false, "Compress output into PNG format. Default uncompressed BMP.")
 	flag.BoolVar(&exifGenerateTemplate, "export-exif-template", false, "Generate JSON template file. For use with supported exif data writing (e.g. --exif-data).")
@@ -191,6 +193,11 @@ func checkParameters() {
 			panic(appendToLog("Size argument must be provided in the following format: WxH"))
 		}
 	}
+	if qualityFactor < 1 {
+		qualityFactor = 1
+	} else if qualityFactor > 31 {
+		qualityFactor = 31
+	}
 	_programWorkingDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(appendToLog("Error obtaining program's working dir."))
@@ -243,6 +250,8 @@ func startConversion() {
 		programArgs = append(programArgs, outputSize)
 	}
 
+	programArgs = append(programArgs, "-qscale:v")
+	programArgs = append(programArgs, fmt.Sprint(qualityFactor))
 	programArgs = append(programArgs, fileAbsPath)
 
 	cmd := &exec.Cmd{

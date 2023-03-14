@@ -69,6 +69,7 @@ func main() {
 		//write exif data
 		writeExifData()
 	}
+	os.Exit(0)
 }
 
 func exportJSONtemplate() {
@@ -87,8 +88,8 @@ func loadJSONexif() ExifData {
 	jsonFile, err := os.Open(exifDataSource)
 	var jsonData ExifData
 	if err != nil {
-		appendToLog("Could not open JSON file.")
-		return jsonData
+		fmt.Println(appendToLog("Could not open JSON file."))
+		os.Exit(1)
 	}
 
 	fileScan := bufio.NewScanner(jsonFile)
@@ -98,7 +99,8 @@ func loadJSONexif() ExifData {
 		decodeErr := json.Unmarshal([]byte(inputRow), &jsonData)
 
 		if decodeErr != nil {
-			appendToLog("Error decoding JSON file.")
+			fmt.Println(appendToLog("Error decoding JSON file."))
+			os.Exit(1)
 		}
 
 	}
@@ -149,7 +151,8 @@ func writeExifData() {
 	}
 	fmt.Println("Writing exif data...")
 	if err := exifToolCmd.Run(); err != nil {
-
+		fmt.Printf("Error writing exif data:\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -279,7 +282,6 @@ func startConversion() {
 	}
 	appendToLog(buffer.String()) //write ffmpeg output to log
 	fmt.Println("Finished generating frames.")
-	os.Exit(0)
 }
 
 // check targetDir and create if non-exist

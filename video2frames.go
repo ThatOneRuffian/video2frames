@@ -207,7 +207,7 @@ func checkParameters() {
 	}
 }
 
-//check sourceFile
+// check sourceFile
 func checkInputFile(sourceFile string) {
 
 	if len(sourceFile) > 0 {
@@ -270,7 +270,7 @@ func startConversion() {
 	fmt.Println("Finished generating frames.")
 }
 
-//check targetDir and create if non-exist
+// check targetDir and create if non-exist
 func dirHandler(targetDir *string) {
 	//append "/" if missing from end of provided dir
 	const forwardSlash byte = 92
@@ -296,7 +296,7 @@ func dirHandler(targetDir *string) {
 	}
 }
 
-//append string to log
+// append string to log
 func appendToLog(logEntry string) string {
 	if len(logOutputDest) > 0 {
 		dataToWrite := time.Now().String() + ": " + logEntry + string('\n')

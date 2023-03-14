@@ -49,7 +49,7 @@ func main() {
 	flag.IntVar(&conversionFactor, "x", 100, "Out of every 100 frames convert X frames.")
 	flag.IntVar(&qualityFactor, "q", 1, "Set the quality of the export 1-31. Lower is better quality.")
 	flag.BoolVar(&grayScale, "g", false, "Convert output to grayscale.")
-	flag.BoolVar(&compressOutput, "c", false, "Compress output into PNG format. Default uncompressed BMP.")
+	flag.BoolVar(&compressOutput, "c", false, "Compress output into JPEG format. Default uncompressed BMP.")
 	flag.BoolVar(&exifGenerateTemplate, "export-exif-template", false, "Generate JSON template file. For use with supported exif data writing (e.g. --exif-data).")
 	flag.Parse()
 

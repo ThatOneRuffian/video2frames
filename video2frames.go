@@ -77,8 +77,10 @@ func exportJSONtemplate() {
 	dataToWrite, encodeErr := json.Marshal(exifDataTemplate)
 	if encodeErr != nil {
 		fmt.Println(appendToLog("Unable to encode template data"))
+		os.Exit(1)
 	}
 	writeData(destinationDirectory+"exif_data.JSON", string(dataToWrite), true)
+	os.Exit(0)
 }
 
 func loadJSONexif() ExifData {
@@ -158,6 +160,7 @@ func dumpExifData(filePath string) {
 	stdOut, err := exifToolCmd.StdoutPipe()
 	if nil != err {
 		fmt.Println(appendToLog("Error attaching to exiftool stdout:"), err.Error())
+		os.Exit(1)
 	}
 	stdOutReader := bufio.NewReader(stdOut)
 	go func(stdOutReader io.Reader) {
@@ -170,6 +173,7 @@ func dumpExifData(filePath string) {
 	if err := exifToolCmd.Start(); nil != err {
 		fmt.Println(fmt.Sprintf("Error starting program: %s, %s", exifToolCmd.Path, err.Error()))
 		fmt.Println("Make sure that exiftool is installed on your system")
+		os.Exit(1)
 	}
 	exifToolCmd.Wait()
 }
@@ -184,13 +188,15 @@ func checkParameters() {
 	}
 
 	if conversionFactor > 100 || conversionFactor < 1 {
-		panic(appendToLog("Conversion factor must be within range 1-100%."))
+		fmt.Println(appendToLog("Conversion factor must be within range 1-100%."))
+		os.Exit(1)
 	}
 	if len(outputSize) > 0 {
 		if strings.Contains(outputSize, "x") || strings.Contains(outputSize, "X") {
 
 		} else {
-			panic(appendToLog("Size argument must be provided in the following format: WxH"))
+			fmt.Println(appendToLog("Size argument must be provided in the following format: WxH"))
+			os.Exit(1)
 		}
 	}
 	if qualityFactor < 1 {
@@ -200,7 +206,7 @@ func checkParameters() {
 	}
 	_programWorkingDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println(appendToLog("Error obtaining program's working dir."))
+		fmt.Println(appendToLog("Error obtaining program's working dir, using relative ./"))
 		programWorkingDir = "./"
 	} else {
 		programWorkingDir = _programWorkingDir
@@ -215,13 +221,16 @@ func checkInputFile(sourceFile string) {
 		_, readError := os.Stat(sourceFile)
 
 		if os.IsNotExist(readError) {
-			panic(appendToLog(sourceFileError))
+			fmt.Println(appendToLog(sourceFileError))
+			os.Exit(1)
 		} else if readError != nil {
 			// catch all other file errors and log
-			panic(appendToLog(sourceFileError))
+			fmt.Println(appendToLog(sourceFileError))
+			os.Exit(1)
 		}
 	} else if !(len(exifDataSource) > 0) {
-		panic(appendToLog("Source file not provided (Use: -i source.mp4)"))
+		fmt.Println(appendToLog("Source file not provided (Use: -i source.mp4)"))
+		os.Exit(1)
 	}
 }
 
@@ -236,7 +245,8 @@ func startConversion() {
 	conversionFactorString := fmt.Sprint(conversionFactorFloat)
 	ffmpegPath, err := exec.LookPath("ffmpeg")
 	if err != nil {
-		panic(appendToLog("Could not find ffmpeg"))
+		fmt.Println(appendToLog("Could not find ffmpeg. Make sure it can be found in system's PATH"))
+		os.Exit(1)
 	}
 	programArgs := []string{ffmpegPath, "-r", "1", "-i", inputFile, "-r", conversionFactorString}
 	fileAbsPath := destinationDirectory + outputPrefix + "frame%03d" + outputSuffix + fileFormat
@@ -264,10 +274,12 @@ func startConversion() {
 	cmd.Stderr = &buffer //ffmpeg outputs on standard error
 	fmt.Println("Generating frames...")
 	if cmd.Run() != nil {
-		panic(appendToLog("could not generate frames"))
+		fmt.Println(appendToLog("Could not generate frames"))
+		os.Exit(1)
 	}
 	appendToLog(buffer.String()) //write ffmpeg output to log
 	fmt.Println("Finished generating frames.")
+	os.Exit(0)
 }
 
 // check targetDir and create if non-exist
@@ -289,10 +301,12 @@ func dirHandler(targetDir *string) {
 	if os.IsNotExist(readError) {
 		makeError := os.MkdirAll(*targetDir, 0777)
 		if makeError != nil {
-			panic(appendToLog(dirError))
+			fmt.Println(appendToLog(dirError))
+			os.Exit(1)
 		}
 	} else if readError != nil { // catch all other dir errors and log
-		panic(appendToLog(dirError))
+		fmt.Println(appendToLog(dirError))
+		os.Exit(1)
 	}
 }
 
